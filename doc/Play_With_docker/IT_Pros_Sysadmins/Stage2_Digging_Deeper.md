@@ -11,13 +11,13 @@ https://training.play-with-docker.com/ops-stage2/
 * Develop a proof of concept application deployment
 
 #### Content:
-* [1.Security](#1. Security)
-    * [1.1.Seccomp profiles](####1.1.Seccomp profiles)
+* [1.Security](#1.Security)
+    * [1.1.Seccomp profiles](####1.1.Seccomp-profiles)
     * [1.2.Linux Kernel Capabilities and Docker](####1.2. Linux Kernel Capabilities and Docker)
 * 2.Networking
 * 3.Orchestration
 
-#### 1. Security
+#### 1.Security
 #### 1.1.Seccomp profiles
 https://training.play-with-docker.com/security-seccomp/
  Seccomp is a sandboxing in Linux kernel that acts like a firewall for system calls. It uses Berkeley Packet Filter (BPF) rules to filter syscalls and control how they are handled. These filters can significantly limit a containers access to the Docker Host’s Linux kernel - especially for simple containers/applications.
