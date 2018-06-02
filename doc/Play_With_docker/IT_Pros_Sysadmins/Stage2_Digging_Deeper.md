@@ -13,7 +13,7 @@ https://training.play-with-docker.com/ops-stage2/
 #### Content:
 * [1.Security](#1.Security)
     * [1.1.Seccomp profiles](####1.1.Seccomp-profiles)
-    * [1.2.Linux Kernel Capabilities and Docker](####1.2. Linux Kernel Capabilities and Docker)
+    * [1.2.Linux Kernel Capabilities and Docker](####1.2.Linux-Kernel-Capabilities-and-Docker)
 * 2.Networking
 * 3.Orchestration
 
@@ -119,4 +119,4 @@ The rule only matches if **all** args match. Use **strace** to get all system ca
 * Chrome’s DSL for generating seccomp BPF programs: https://cs.chromium.org/chromium/src/sandbox/linux/bpf_dsl/bpf_dsl.h?sq=package:chromium&dr=CSs
 
 
-#### 1.2. Linux Kernel Capabilities and Docker
+#### 1.2.Linux Kernel Capabilities and Docker
