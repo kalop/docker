@@ -11,9 +11,9 @@ https://training.play-with-docker.com/ops-stage2/
 * Develop a proof of concept application deployment
 
 #### Content:
-* [1.Security](#1.Security)
-    * [1.1.Seccomp profiles](####1.1.Seccomp-profiles)
-    * [1.2.Linux Kernel Capabilities and Docker](####1.2.Linux-Kernel-Capabilities-and-Docker)
+* [1.Security](#1security)
+    * [1.1.Seccomp profiles](#11seccomp-profiles)
+    * [1.2.Linux Kernel Capabilities and Docker](#12linux-kernel-capabilities-and-docker)
 * 2.Networking
 * 3.Orchestration
 
