@@ -11,9 +11,9 @@ https://training.play-with-docker.com/ops-stage1/
 * How Docker can help
 
 #### Content:
-* Your First Linux Containers
-* Customizing Docker Images
-* Deploy and Managing Multiple Containers
+* [1.Your First Linux Containers](#1-your-first-linux-containers)
+* [2.Customizing Docker Images](#2-customizing-docker-images)
+* [3.Deploy and Managing Multiple Containers](#3-deploy-and-managing-multiple-containers)
 
 #### 1. Your First Linux Containers
 https://training.play-with-docker.com/ops-s1-hello/
