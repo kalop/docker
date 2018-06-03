@@ -15,7 +15,7 @@ https://training.play-with-docker.com/ops-stage2/
     * [1.1.Seccomp profiles](#11seccomp-profiles)
     * [1.2.Linux Kernel Capabilities and Docker](#12linux-kernel-capabilities-and-docker)
 * [2.Networking](#2networking)
-* 3.Orchestration
+* [3.Orchestration](#3orchestration)
 
 #### 1.Security
 #### 1.1.Seccomp profiles
@@ -424,3 +424,101 @@ To remove node1 and node2 from the Swarm
 $ docker swarm leave --force
 
 ```
+
+#### 3.Orchestration
+https://training.play-with-docker.com/orchestration-hol/
+
+
+#### Content:
+* [3.1.What is Orchestration](#31what-is-orchestration)
+* [3.2.Configure Swarm Mode](#32configure-swarm-mode)
+* [3.3.Deploy applications across multiple hosts](#33deploy-applications-across-multiple-hosts)
+* [3.4.Scale the application](#34scale-the-application)
+* [3.5.Drain a node and reschedule the containers](#35drain-a-node-and-reschedule-the-containers)
+* [3.6.Cleaning Up](#36cleaning-up)
+
+#### 3.1.What is Orchestration
+Lets say that you have an application that has high traffic along with high-availability requirements. Due to these requirements, you typically want to deploy across at least 3+ machines, so that in the event a host fails, your application will still be accessible from at least two others. One cool feature of Orchestration with Docker Swarm, is that you can deploy an application across many hosts with only a single command .
+
+
+#### 3.2.Configure Swarm Mode
+* Create a Manager node
+    ```
+    $ docker swarm init --advertise-addr $(hostname -i)
+
+    ```
+    * It returns a command to add workers ans managers. To get the commands agani later:
+        ```
+        $ docker swarm join-token worker/manager
+
+        ```
+
+* Join workers
+    ```
+    $ docker swarm join --token SWMTKN-1-31kv8keprd1bg4zppxtqo92gzfufrhshd2xv6kfb6amjbn6qtz-1evb0c05v71gy7o4ea9rnhqit 192.168.0.23:2377
+    ```
+* From the manager:
+    ```
+    $ docker node ls
+
+    ```
+
+#### 3.3.Deploy applications across multiple hosts
+* Deploy app components as Docker services, lets deploy sleep as a Service across our Docker Swarm.
+From manager:
+    ```
+    $ docker service create --name sleep-app ubuntu sleep infinity
+    ```
+    * Verify:
+    ```
+    $ docker service ls
+    ```
+
+#### 3.4.Scale the application
+* Scale the number of containers in the sleep-app service to 7
+```
+$ docker service update --replicas 7 sleep-app
+```
+
+* There are 7 sleep-app containers in the cluster.
+```
+$ docker service ps sleep-app
+```
+* Scale down to 4 replicas
+```
+$ docker service update --replicas 4 sleep-app
+```
+#### 3.5.Drain a node and reschedule the containers
+Now you are doing maintenance on one of your servers so you will need to gracefully take a server out of the swarm without interrupting service to your customers.
+
+* Look at the status of your nodes
+```
+$ docker node ls
+```
+* Check node2, from node2:
+```
+$ docker ps
+```
+* Take node2 out of service from manager:
+```
+$ docker node ls  --> to get the ID
+$ docker node update --availability drain <node2 ID>
+```
+Now node2 is in Drain started
+
+* Check the service from manager:
+```
+$ docker service ps sleep-app
+```
+The container that was running in node2 has switched to other node
+
+#### 3.6.Cleaning Up
+* From manager:
+```
+$ docker service rm sleep-app
+$ docker kill yourcontainerid
+$ docker swarm leave --force  --> from every node
+```
+#### Bonnus in Orchestration
+
+http://container.training/
