@@ -14,7 +14,7 @@ https://training.play-with-docker.com/ops-stage2/
 * [1.Security](#1security)
     * [1.1.Seccomp profiles](#11seccomp-profiles)
     * [1.2.Linux Kernel Capabilities and Docker](#12linux-kernel-capabilities-and-docker)
-* 2.Networking
+* [2.Networking](#2networking)
 * 3.Orchestration
 
 #### 1.Security
@@ -259,3 +259,168 @@ $ docker run --rm -it alpine sh -c 'apk add -U libcap;capsh --help'
     ```
 
 [Futher reading](https://www.kernel.org/doc/ols/2008/ols2008v1-pages-163-172.pdf)
+
+
+#### 2.Networking
+https://training.play-with-docker.com/docker-networking-hol/
+
+#### Content:
+* [2.1.Networking Basics](#21networking-basics)
+* [2.2.Bridge Networking](#22bridge-networking)
+* [2.3.Overlay Networking](#23overlay-networking)
+* [2.4.Cleaning Up](#24cleaning-up)
+
+#### 2.1.Networking Basics
+
+The basic command:
+```
+$ docker network
+```
+Allows you to create new networks, list existing networks, inspect networks, and remove networks. It also allows you to connect and disconnect containers from networks.
+
+
+#### 2.2.Bridge Networking
+##### 2.2.1 The basics
+Every clean installation of Docker comes with a pre-built network called bridge. It’s important to note that the network and the driver are connected, but they are not the same.
+
+Install brctl and list the linux bridges on the Docker Host
+```
+$ sudo apt-get install bridge-utils
+brctl show
+```
+##### 2.2.2 Connect a container
+Example, create a container running in the backgroud:
+```
+$ docker run -dt ubuntu sleep infinity
+
+```
+Now with *brctl show* we can see that it has an interface
+
+
+To see the new container attached to the bridge network:
+```
+$ docker network inspect bridge
+```
+We can get the IP address of the new container
+
+#### 2.2.3.Test network connectivity
+With the IP we can ping the container. But, we can also verify the container can connect to the ouside world too.
+
+```
+$ docker ps
+$ docker exec -it <container id> /bin/bash
+# ping 8.8.8.8
+```
+
+#### 2.2.4.Configure NAT for external connectivity
+
+In this step we’ll start a new NGINX container and map port 8080 on the Docker host to port 80 inside of the container.
+
+* Start a new container based off the official NGINX image
+```
+$ docker run --name web1 -d -p 8080:80 nginx
+```
+Take note of the command the container is running as well as the port mapping - 0.0.0.0:8080->80/tcp maps port 8080 on all host interfaces to port 80 inside the web1 container. This port mapping is what effectively makes the containers web service accessible from external sources (via the Docker hosts IP address on port 8080).
+
+#### 2.3.Overlay Networking
+##### 2.3.1 The Basics
+Initialize a new Swarm
+
+```
+$ docker swarm init --advertise-addr $(hostname -i)
+
+```
+Join a single worker node
+```
+$ docker swarm join --token SWMTKN-1-5qgd5nyaw4kv9v139cfehrvqzttc51o31pvmgmtyabh2lm931a-d1nbiwa9h1ttwtgo3c9kyqfqx 192.168.0.28:2377
+```
+Verify that both nodes are part of the Swarm
+```
+$ docker node ls
+
+```
+ The important thing to check is that both nodes have joined the Swarm and are ready and active.
+
+
+##### 2.3.2 Create an overlay network
+
+Create a new overlay network called “overnet”
+```
+$ docker network create -d overlay overnet
+
+```
+Verify the network
+```
+$ docker network ls
+
+```
+* It only appears in the first node because Docker only extends overlay networks to hosts when they are needed.
+
+
+More dtail information about the networks
+```
+$ docker network inspect <network>
+
+```
+##### 2.3.3 Create a service
+Create a new service called **myservice** on the overnet network with two tasks/replicas.
+
+```
+$ docker service create --name myservice \
+--network overnet \
+--replicas 2 \
+ubuntu sleep infinity
+
+```
+Verify that the service is created and both replicas are up by running
+```
+$ docker service ls
+
+```
+Verify that a single task (replica) is running on each of the two nodes in the Swarm
+```
+$ docker service ps myservice
+
+```
+Now the overnet network appears in the second node
+
+##### 2.3.4 Test the networks
+Inspect and list the service tasks to get the **IP** and **container ID**
+
+Log on the service task
+```
+$ docker exec -it <CONTAINER ID> /bin/bash
+$ ping IP
+
+```
+Both tasks from the myservice service are on the same overlay network spanning both nodes and that they can use this network to communicate.
+
+##### 2.3.5 Test service discovery
+From inside the container we can get the address of the embedded DNS resolver running inside the container listening on 127.0.0.11:53
+```
+cat /etc/resolv.conf
+```
+Inspect the configuration of the “myservice” service
+```
+$ docker service inspect myservice
+
+```
+Towards the bottom of the output you will see the VIP of the service listed.
+
+
+#### 2.4.Cleaning Up
+
+To remove the service called myservice
+```
+$ docker service rm myservice
+```
+To kill the containers we started
+```
+$ docker kill <CONTAINER ID ...>
+
+```
+To remove node1 and node2 from the Swarm
+```
+$ docker swarm leave --force
+
+```
